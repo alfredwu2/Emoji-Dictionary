@@ -36,6 +36,8 @@ class EmojiTableViewController: UITableViewController {
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
+        tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.estimatedRowHeight = 44.0
     }
 
     override func didReceiveMemoryWarning() {
@@ -69,6 +71,13 @@ class EmojiTableViewController: UITableViewController {
         return cell
     }
 
+    @IBAction func refreshControlActivated(_ sender: UIRefreshControl) {
+        // Network refresh or other operation that updates the array of data displayed in the table view.
+        
+        tableView.reloadData()
+        sender.endRefreshing()
+    }
+    
     // MARK: - Table view delegate
     
     @IBAction func editButtonTapped(_ sender: UIBarButtonItem) {
@@ -107,7 +116,19 @@ class EmojiTableViewController: UITableViewController {
     }
 
     @IBAction func unwindToEmojiTableView(segue: UIStoryboardSegue) {
+        guard segue.identifier == "saveUnwind" else { return }
+        let sourceViewController = segue.source as! AddEditEmojiTableViewController
         
+        if let emoji = sourceViewController.emoji {
+            if let selectedIndexPath = tableView.indexPathForSelectedRow {
+                emojis[selectedIndexPath.row] = emoji
+                tableView.reloadRows(at: [selectedIndexPath], with: .none)
+            } else {
+                let newIndexPath = IndexPath(row: emojis.count, section: 0)
+                emojis.append(emoji)
+                tableView.insertRows(at: [newIndexPath], with: .automatic)
+            }
+        }
     }
     
     /*
